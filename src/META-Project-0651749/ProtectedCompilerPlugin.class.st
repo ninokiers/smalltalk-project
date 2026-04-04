@@ -7,7 +7,7 @@ Class {
 
 { #category : 'as yet unclassified' }
 ProtectedCompilerPlugin >> mangle: aSelector [
-	^('__', ast selector) asSymbol
+	^('__', aSelector) asSymbol
 ]
 
 { #category : 'as yet unclassified' }

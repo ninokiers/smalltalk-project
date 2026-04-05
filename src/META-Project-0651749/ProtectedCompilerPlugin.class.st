@@ -6,28 +6,74 @@ Class {
 }
 
 { #category : 'as yet unclassified' }
+ProtectedCompilerPlugin >> find: aSelector inMethodsOf: aClass [
+	"""
+		Checks whether the method is first encountered as public or private in the
+		lookup tree, and returns the corresponding selector.
+		If no method with that name is found, it returns the unmangled selector.
+	"""
+	| lookupClass |
+	
+	lookupClass := aClass.
+	
+	[ lookupClass isNil ] whileFalse: [ 
+		lookupClass methodDict
+			at: (self mangle: aSelector)
+			ifPresent: [ ^ self mangle: aSelector ].
+		
+		lookupClass methodDict
+			at: (aSelector)
+			ifPresent: [ ^ aSelector ].
+	
+		lookupClass := lookupClass superclass.
+	].
+
+	^aSelector
+	
+]
+
+{ #category : 'as yet unclassified' }
 ProtectedCompilerPlugin >> mangle: aSelector [
+	"Mangle the argument"
 	^('__', aSelector) asSymbol
 ]
 
 { #category : 'as yet unclassified' }
 ProtectedCompilerPlugin >> rewritePrivate: aMethodNode [
+	"""
+		Rewrite the 'private' method to mangle the selector and self and super sends.
+	"""
+	
+	" Mangle self and super sends "
 	aMethodNode nodesDo: [ :node |
 		node isMessage ifTrue: [ 
-			((node isSelfSend) or: (node isSuperSend)) ifTrue: [
-				node renameSelector: (self mangle: node selector) andArguments: node arguments.
-			]
+			node isSelfSend ifTrue: [
+				node
+					renameSelector: (self find: node selector inMethodsOf: ast methodClass)
+					andArguments: node arguments.
+			].
+			node isSuperSend ifTrue: [
+				node
+					renameSelector: (self find: node selector inMethodsOf: ast methodClass superclass)
+					andArguments: node arguments.
+			].
 		]
 	].
 	
+	" Mangle selector "
 	aMethodNode renameSelector: (self mangle: ast selector) andArguments: ast arguments.
+	
 	^aMethodNode
 ]
 
 { #category : 'as yet unclassified' }
 ProtectedCompilerPlugin >> rewritePublic: aMethodNode [
+	"""
+		Write a new 'public' method that simply calls the 'private' method
+	"""
 	| body |
 	
+	" Create new body ensuring to keep the right selector and arguments. "
 	body := RBSequenceNode new.
 	body addNode: (RBMessageNode
 		receiver: RBVariableNode selfNode
@@ -36,6 +82,8 @@ ProtectedCompilerPlugin >> rewritePublic: aMethodNode [
 	body addReturn.
 	
 	aMethodNode body: body.
+	
+	" Add <public> pragma "
 	aMethodNode addPragma: (RBPragmaNode selector: #public arguments: #()).
 	
 	^aMethodNode

@@ -1,12 +1,12 @@
 Class {
-	#name : 'AnimalTests',
+	#name : 'AnimalTest',
 	#superclass : 'TestCase',
 	#category : 'META-Project-0651749',
 	#package : 'META-Project-0651749'
 }
 
 { #category : 'running' }
-AnimalTests >> setUp [
+AnimalTest >> setUp [
 	| animal cow |
 	
 	super setUp.
@@ -24,10 +24,10 @@ AnimalTests >> setUp [
 	animal class compile: 'compiler ^super compiler addPlugin: ProtectedCompilerPlugin new; yourself'.
 	
 	animal
-		compile: 'eat: food ^self digest: food';
 		compile: 'digest: food <protected> ^''nom '', food';
-		compile: 'perceive <protected> ^''time goes by'''	.
-			
+		compile: 'perceive <protected> ^''time goes by'''	;
+		compile: 'eat: food ^self digest: food'.
+		
 	cow := ShiftClassBuilder new
 		superclass: Animal;
 		name: #Cow;
@@ -44,7 +44,8 @@ AnimalTests >> setUp [
 ]
 
 { #category : 'tests' }
-AnimalTests >> testAnimalDigest [
+AnimalTest >> testAnimalDigest [
+	"Requirement 1.1"
 	| animal |
 	animal := Animal new.
 	
@@ -52,7 +53,8 @@ AnimalTests >> testAnimalDigest [
 ]
 
 { #category : 'as yet unclassified' }
-AnimalTests >> testAnimalEat [
+AnimalTest >> testAnimalEat [
+	"Requirement 1.1"
 	| animal |
 	animal := Animal new.
 	
@@ -60,7 +62,21 @@ AnimalTests >> testAnimalEat [
 ]
 
 { #category : 'tests' }
-AnimalTests >> testCowDream [
+AnimalTest >> testBackwardCompatibility [
+	"Requirement 1.2"
+	| cow |
+	cow := Cow new.
+	
+	cow class compile: 'getClass ^self class'.
+	
+	self assert: (cow getClass) equals: (cow class).
+	
+	
+]
+
+{ #category : 'tests' }
+AnimalTest >> testCowDream [
+	"Requirement 1.1"
 	| cow |
 	cow := Cow new.
 	
@@ -68,7 +84,8 @@ AnimalTests >> testCowDream [
 ]
 
 { #category : 'tests' }
-AnimalTests >> testCowEat [
+AnimalTest >> testCowEat [
+	"Requirement 1.1"
 	| cow |
 	cow := Cow new.
 	
@@ -76,7 +93,8 @@ AnimalTests >> testCowEat [
 ]
 
 { #category : 'tests' }
-AnimalTests >> testCowInvalid [
+AnimalTest >> testCowInvalid [
+	"Requirement 1.1"
 	| cow |
 	cow := Cow new.
 	

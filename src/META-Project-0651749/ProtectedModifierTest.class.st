@@ -1,12 +1,12 @@
 Class {
-	#name : 'AnimalTest',
+	#name : 'ProtectedModifierTest',
 	#superclass : 'TestCase',
 	#category : 'META-Project-0651749',
 	#package : 'META-Project-0651749'
 }
 
 { #category : 'running' }
-AnimalTest >> setUp [
+ProtectedModifierTest >> setUp [
 	| animal cow |
 	
 	super setUp.
@@ -44,7 +44,7 @@ AnimalTest >> setUp [
 ]
 
 { #category : 'tests' }
-AnimalTest >> testAnimalDigest [
+ProtectedModifierTest >> testAnimalDigest [
 	"Requirement 1.1"
 	| animal |
 	animal := Animal new.
@@ -53,7 +53,7 @@ AnimalTest >> testAnimalDigest [
 ]
 
 { #category : 'as yet unclassified' }
-AnimalTest >> testAnimalEat [
+ProtectedModifierTest >> testAnimalEat [
 	"Requirement 1.1"
 	| animal |
 	animal := Animal new.
@@ -62,7 +62,7 @@ AnimalTest >> testAnimalEat [
 ]
 
 { #category : 'tests' }
-AnimalTest >> testBackwardCompatibility [
+ProtectedModifierTest >> testBackwardCompatibility [
 	"Requirement 1.2"
 	| cow |
 	cow := Cow new.
@@ -75,7 +75,7 @@ AnimalTest >> testBackwardCompatibility [
 ]
 
 { #category : 'tests' }
-AnimalTest >> testCowDream [
+ProtectedModifierTest >> testCowDream [
 	"Requirement 1.1"
 	| cow |
 	cow := Cow new.
@@ -84,7 +84,7 @@ AnimalTest >> testCowDream [
 ]
 
 { #category : 'tests' }
-AnimalTest >> testCowEat [
+ProtectedModifierTest >> testCowEat [
 	"Requirement 1.1"
 	| cow |
 	cow := Cow new.
@@ -93,7 +93,7 @@ AnimalTest >> testCowEat [
 ]
 
 { #category : 'tests' }
-AnimalTest >> testCowInvalid [
+ProtectedModifierTest >> testCowInvalid [
 	"Requirement 1.1"
 	| cow |
 	cow := Cow new.

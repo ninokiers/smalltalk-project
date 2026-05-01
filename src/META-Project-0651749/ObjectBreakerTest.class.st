@@ -33,7 +33,12 @@ ObjectBreakerTest >> testObjectBreakerCreation [
 	breaker := ObjectBreaker for: human.
 	
 	self assert: (breaker object) equals: human.
+	self assert: (human class) equals: AnonymousHuman.
+	self assert: (human greet) equals: 'Hello'.
 	
 	breaker clear.
+	
+	self assert: (human class) equals: Human.
+	self deny: (Smalltalk hasClassNamed: #AnonymousHuman).
 	
 ]

@@ -29,6 +29,12 @@ ObjectBreaker >> assertNoSuperSendIn: aMethod [
 	].
 ]
 
+{ #category : 'accessing' }
+ObjectBreaker >> clear [
+	self rerouteClass: originalClass.
+	anonymousClass removeFromSystem.
+]
+
 { #category : 'as yet unclassified' }
 ObjectBreaker >> createAnonymousSubclass [
 	"""
@@ -76,6 +82,7 @@ ObjectBreaker >> object: anObject [
 	originalClass := anObject class.
 	^self
 		createAnonymousSubclass;
+		rerouteClass: anonymousClass;
 		yourself.
 ]
 
@@ -98,4 +105,9 @@ ObjectBreaker >> onMessageSendIn: aSelector when: aBlock [
 	
 	anonymousClass compile: method sourceCode.
 	
+]
+
+{ #category : 'as yet unclassified' }
+ObjectBreaker >> rerouteClass: aClass [
+	targetObject primitiveChangeClassTo: aClass basicNew.
 ]

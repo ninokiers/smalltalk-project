@@ -17,34 +17,28 @@ ObjectBreaker class >> for: anObject [
 
 { #category : 'asserting' }
 ObjectBreaker >> assertNoSuperSendIn: aMethod [
-	"""
-		Signals the DoesNotSupportSuperSends error if the method contains super sends.
-	"""
-	| ast |
+	"Signals the DoesNotSupportSuperSends error if the method contains super sends"
+	| hasSuperSends |
 	
-	ast := RBParser parseMethod: aMethod sourceCode.
+	hasSuperSends := aMethod ast allChildren
+		anySatisfy: [ :node | node isMessage and: [ node isSuperSend ] ].
 	
-	ast nodesDo: [ :node |
-		(node isSuperSend) ifTrue: [ ObjectCentricDebuggingDoesNotSupportSuperSends signal ]
-	].
+	hasSuperSends ifTrue: [ ObjectCentricDebuggingDoesNotSupportSuperSends signal ].
 ]
 
-{ #category : 'accessing' }
+{ #category : 'cleanup' }
 ObjectBreaker >> clear [
+	"Cleanup: reroute the object to the original class and remove the anonymous class"
 	self rerouteClass: originalClass.
 	anonymousClass removeFromSystem.
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'creation' }
 ObjectBreaker >> createAnonymousSubclass [
-	"""
-		Creates an anonymous subclass of the linked object's class.
-	"""
+	"Creates an anonymous subclass of the linked object's class"
 	
-	" If no object is linked -> exit and return nil "
-	targetObject ifNil: [ ^nil ].
+	targetObject ifNil: [ ^nil ]. "If no object is linked -> exit and return nil"
 	
-	" Create anonymous class "
 	anonymousClass := ShiftClassBuilder new
 		superclass: originalClass;
 		name: 'Anonymous', originalClass name;
@@ -54,30 +48,29 @@ ObjectBreaker >> createAnonymousSubclass [
 	
 ]
 
-{ #category : 'as yet unclassified' }
-ObjectBreaker >> installWrapperOn: aSelector condition: conditionBlock [
-	"""
-		Install a wrapper method on the anonymous class for a specific method
-		of the original class.
-	"""
+{ #category : 'invalidate' }
+ObjectBreaker >> installMethod: aSelector [
+	"Install a copy of the original method on the anonymous class"
 	| method |
-	
 	method := originalClass >> aSelector.
 	
 	self assertNoSuperSendIn: method.
 	
 	anonymousClass compile: method sourceCode.
 	
+	^anonymousClass >> aSelector.
 	
 ]
 
 { #category : 'accessing' }
 ObjectBreaker >> object [
+	"Return the target object"
 	^targetObject
 ]
 
-{ #category : 'accessing' }
+{ #category : 'creation' }
 ObjectBreaker >> object: anObject [
+   "Initialize the object breaker"
 	targetObject := anObject.
 	originalClass := anObject class.
 	^self
@@ -87,27 +80,46 @@ ObjectBreaker >> object: anObject [
 ]
 
 { #category : 'as yet unclassified' }
+ObjectBreaker >> onMessageSend [
+	"Calls onMessageSendIn:when: with every method of the class that doesn't contain a super send"
+	originalClass methodsDo: [ :method |
+		[ self onMessageSendIn: method selector ]
+			on: ObjectCentricDebuggingDoesNotSupportSuperSends
+			do: [ " nothing " ]
+	]
+]
+
+{ #category : 'wrapping' }
 ObjectBreaker >> onMessageSendIn: aSelector [
+	"Calls onMessageSendIn:when: with the conditional argument being always true"
 	^self onMessageSendIn: aSelector when: [ :send | true ]
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'wrapping' }
 ObjectBreaker >> onMessageSendIn: aSelector when: aBlock [
 	"""
-		Install a wrapper method on the anonymous class for a specific method
-		of the original class.
+		Install a wrapper method on the anonymous class with breaks
+		on message sends, when the specific condition is met.
 	"""
-	| method |
+	| method link |
 	
-	method := originalClass >> aSelector.
+	method := self installMethod: aSelector.
 	
-	self assertNoSuperSendIn: method.
+	"MetaLink calls 'Halt now' when the condition is met"
+	link := MetaLink new
+		metaObject: Halt;
+		selector: #now;
+		control: #before;
+		condition: aBlock arguments: #(#node).
 	
-	anonymousClass compile: method sourceCode.
-	
+	"Link all message send nodes"
+	method ast sendNodes do: [ :node |
+		node link: link
+	].
 ]
 
-{ #category : 'as yet unclassified' }
+{ #category : 'creation' }
 ObjectBreaker >> rerouteClass: aClass [
+	"Change the class of the target object"
 	targetObject primitiveChangeClassTo: aClass basicNew.
 ]

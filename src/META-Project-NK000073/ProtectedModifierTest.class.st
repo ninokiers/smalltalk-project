@@ -17,7 +17,7 @@ ProtectedModifierTest >> setUp [
 	animal := ShiftClassBuilder new
 		superclass: Object;
 		name: #Animal;
-		package: 'META-Project-0651749';
+		package: 'META-Project-NK000073';
 		build;
 		install.
 		
@@ -31,7 +31,7 @@ ProtectedModifierTest >> setUp [
 	cow := ShiftClassBuilder new
 		superclass: Animal;
 		name: #Cow;
-		package: 'META-Project-0651749';
+		package: 'META-Project-NK000073';
 		build;
 		install.
 	

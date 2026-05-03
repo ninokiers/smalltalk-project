@@ -42,7 +42,7 @@ ObjectBreaker >> createAnonymousSubclass [
 	anonymousClass := ShiftClassBuilder new
 		superclass: originalClass;
 		name: 'Anonymous', originalClass name;
-		package: 'META-Project-0651749';
+		package: originalClass package;
 		build;
 		install.
 	
@@ -110,7 +110,7 @@ ObjectBreaker >> onMessageSendIn: aSelector when: aBlock [
 		metaObject: Halt;
 		selector: #now;
 		control: #before;
-		condition: aBlock arguments: #(#node).
+		condition: aBlock arguments: #(node).
 	
 	"Link all message send nodes"
 	method ast sendNodes do: [ :node |

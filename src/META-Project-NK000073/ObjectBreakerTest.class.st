@@ -16,7 +16,7 @@ ObjectBreakerTest >> setUp [
 	humanClass := ShiftClassBuilder new
 		superclass: Object;
 		name: #Human;
-		package: 'META-Project-0651749';
+		package: 'META-Project-NK000073';
 		build;
 		install.
 	

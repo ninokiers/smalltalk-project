@@ -55,7 +55,7 @@ MultipleExceptionBlockClosure >> value: aValue [
 			]
 		]
 	].
-
+	
 	^ nested value
 
 ]
